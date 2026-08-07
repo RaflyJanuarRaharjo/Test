@@ -9,11 +9,10 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydz-ax0rYo91osF5v3IoDT8SqwP2ZqI8hbWeFgYQd1R1JbsgJI_ShFZScyjb6_bdgR/exec';
 
 export default async function handler(req, res) {
-  // Selalu balas 200 ke Telegram secepatnya, apapun yang terjadi di belakang.
-  // Ini penting supaya Telegram nggak nganggep webhook-nya gagal/lambat.
-  res.status(200).send('ok');
-
-  // Teruskan data ke Apps Script setelah respons ke Telegram terkirim.
+  // Teruskan data ke Apps Script dan TUNGGU sampai selesai sebelum
+  // function ini berhenti. Kalau kita balas ke Telegram duluan lalu
+  // berhenti, Vercel bisa mematikan proses sebelum fetch ke Apps
+  // Script sempat jalan/selesai.
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -24,4 +23,6 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Gagal meneruskan ke Apps Script:', err);
   }
+
+  res.status(200).send('ok');
 }
